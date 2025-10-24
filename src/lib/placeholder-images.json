@@ -1,3 +1,88 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-home",
+      "description": "A stylish, modern recording studio setup.",
+      "imageUrl": "https://images.unsplash.com/photo-1601856254555-a9c0ebef8af3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxyZWNvcmRpbmclMjBzdHVkaW98ZW58MHx8fHwxNzYxMjc3ODcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "recording studio"
+    },
+    {
+      "id": "prod1-1",
+      "description": "Front view of a vintage-style camera.",
+      "imageUrl": "https://images.unsplash.com/photo-1516962126636-27ad087061cc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx2aW50YWdlJTIwY2FtZXJhfGVufDB8fHx8MTc2MTMyMzcxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vintage camera"
+    },
+    {
+      "id": "prod1-2",
+      "description": "Side view of a vintage-style camera.",
+      "imageUrl": "https://images.unsplash.com/photo-1596888387677-ec9d3843424b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjYW1lcmElMjBzaWRlfGVufDB8fHx8MTc2MTI3OTQwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "camera side"
+    },
+    {
+      "id": "prod2-1",
+      "description": "Sleek, black over-ear headphones.",
+      "imageUrl": "https://images.unsplash.com/photo-1641420661613-f5fb286eec24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxibGFjayUyMGhlYWRwaG9uZXN8ZW58MHx8fHwxNzYxMjM2NzIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "black headphones"
+    },
+    {
+      "id": "prod2-2",
+      "description": "Headphones folded in their case.",
+      "imageUrl": "https://images.unsplash.com/photo-1612188533534-a64bb2d3da17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxoZWFkcGhvbmVzJTIwY2FzZXxlbnwwfHx8fDE3NjEyMzM4OTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "headphones case"
+    },
+    {
+      "id": "prod3-1",
+      "description": "Modern white gaming controller.",
+      "imageUrl": "https://images.unsplash.com/photo-1611138290962-2c550ffd4002?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBjb250cm9sbGVyfGVufDB8fHx8MTc2MTMxMzQwM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gaming controller"
+    },
+    {
+      "id": "prod3-2",
+      "description": "Gaming controller held by a person.",
+      "imageUrl": "https://images.unsplash.com/photo-1677545215960-071e5290f9db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwbGF5aW5nJTIwZ2FtZXxlbnwwfHx8fDE3NjEzMjM3MTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "playing game"
+    },
+    {
+      "id": "prod4-1",
+      "description": "A movie clapperboard.",
+      "imageUrl": "https://images.unsplash.com/photo-1684159235233-2e93b5ff0e7b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtb3ZpZSUyMGNsYXBwZXJib2FyZHxlbnwwfHx8fDE3NjEzMjM3MTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "movie clapperboard"
+    },
+    {
+      "id": "prod5-1",
+      "description": "An electric guitar leaning against an amplifier.",
+      "imageUrl": "https://images.unsplash.com/photo-1578275787710-b717b7494f84?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxlbGVjdHJpYyUyMGd1aXRhcnxlbnwwfHx8fDE3NjEzMjM3MTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "electric guitar"
+    },
+    {
+      "id": "prod6-1",
+      "description": "A professional broadcasting microphone on a stand.",
+      "imageUrl": "https://images.unsplash.com/photo-1745848413076-cdf1fa5d4d71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxicm9hZGNhc3RpbmclMjBtaWNyb3Bob25lfGVufDB8fHx8MTc2MTMyMzcxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "broadcasting microphone"
+    },
+    {
+      "id": "prod7-1",
+      "description": "A compact drone with camera.",
+      "imageUrl": "https://images.unsplash.com/photo-1759974990343-c960e5831853?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjYW1lcmElMjBkcm9uZXxlbnwwfHx8fDE3NjEyOTUzMzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "camera drone"
+    },
+    {
+      "id": "prod8-1",
+      "description": "A DJ mixing console.",
+      "imageUrl": "https://images.unsplash.com/photo-1619250824665-73536a4e365d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxkaiUyMGNvbnNvbGV8ZW58MHx8fHwxNzYxMjI1NTMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dj console"
+    },
+    {
+      "id": "user-avatar-1",
+      "description": "Avatar for a user.",
+      "imageUrl": "https://images.unsplash.com/photo-1540569014015-19a7be504e3a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjEyMjc5NjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "user-avatar-2",
+      "description": "Avatar for another user.",
+      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MTI1ODc2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman portrait"
+    }
+  ]
 }
