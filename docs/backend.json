@@ -1,0 +1,386 @@
+{
+  "entities": {
+    "Product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "type": "object",
+      "description": "Represents a product sold on BBS Entertainment.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the product.",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the product."
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the product."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the product image.",
+          "format": "uri"
+        },
+        "price": {
+          "type": "number",
+          "description": "Price of the product."
+        },
+        "stockQuantity": {
+          "type": "number",
+          "description": "Number of units currently in stock."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to Category. (Relationship: Category 1:N Product)"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tags associated with the product",
+          "items": {
+            "type": "string"
+          }
+        },
+        "averageRating": {
+          "type": "number",
+          "description": "The average rating given to this product by users. "
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "imageUrl",
+        "price",
+        "stockQuantity",
+        "categoryId"
+      ]
+    },
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a category of products.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the category."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the category."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the category."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the category image.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "imageUrl"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of BBS Entertainment.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name of the user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user.",
+          "format": "email"
+        },
+        "address": {
+          "type": "string",
+          "description": "Shipping address of the user."
+        },
+        "orderIds": {
+          "type": "array",
+          "description": "References to Orders. (Relationship: User 1:N Order)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "favoriteProductIds": {
+          "type": "array",
+          "description": "References to favorite products of the user.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "address"
+      ]
+    },
+    "Order": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Order",
+      "type": "object",
+      "description": "Represents an order placed by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Order)"
+        },
+        "orderDate": {
+          "type": "string",
+          "description": "Date the order was placed.",
+          "format": "date-time"
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total amount of the order."
+        },
+        "shippingAddress": {
+          "type": "string",
+          "description": "Shipping address for the order."
+        },
+        "orderItemIds": {
+          "type": "array",
+          "description": "References to OrderItems. (Relationship: Order 1:N OrderItem)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "type": "string",
+          "description": "Order status (e.g., pending, processing, shipped, delivered)."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "orderDate",
+        "totalAmount",
+        "shippingAddress",
+        "status"
+      ]
+    },
+    "OrderItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "OrderItem",
+      "type": "object",
+      "description": "Represents an item within an order.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order item."
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Reference to Order. (Relationship: Order 1:N OrderItem)"
+        },
+        "productId": {
+          "type": "string",
+          "description": "Reference to Product. (Relationship: Product 1:N OrderItem)"
+        },
+        "quantity": {
+          "type": "number",
+          "description": "Quantity of the product in the order item."
+        },
+        "pricePerUnit": {
+          "type": "number",
+          "description": "Price of the product at the time of the order."
+        }
+      },
+      "required": [
+        "id",
+        "orderId",
+        "productId",
+        "quantity",
+        "pricePerUnit"
+      ]
+    },
+    "Review": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Review",
+      "type": "object",
+      "description": "Represents a user review for a product.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the review."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Review)"
+        },
+        "productId": {
+          "type": "string",
+          "description": "Reference to Product. (Relationship: Product 1:N Review)"
+        },
+        "rating": {
+          "type": "number",
+          "description": "Rating given by the user (e.g., 1-5 stars)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "User's comment about the product."
+        },
+        "reviewDate": {
+          "type": "string",
+          "description": "Date the review was submitted.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "productId",
+        "rating",
+        "comment",
+        "reviewDate"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/products/{productId}",
+        "definition": {
+          "entityName": "Product",
+          "schema": {
+            "$ref": "#/backend/entities/Product"
+          },
+          "description": "Stores product information.  'categoryId' references the category.  'averageRating' contains denormalized rating information.",
+          "params": [
+            {
+              "name": "productId",
+              "description": "Unique identifier for the product."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/categories/{categoryId}",
+        "definition": {
+          "entityName": "Category",
+          "schema": {
+            "$ref": "#/backend/entities/Category"
+          },
+          "description": "Stores category information.",
+          "params": [
+            {
+              "name": "categoryId",
+              "description": "Unique identifier for the category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/orders/{orderId}",
+        "definition": {
+          "entityName": "Order",
+          "schema": {
+            "$ref": "#/backend/entities/Order"
+          },
+          "description": "Stores order information for a specific user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            },
+            {
+              "name": "orderId",
+              "description": "Unique identifier for the order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/orders/{orderId}/orderItems/{orderItemId}",
+        "definition": {
+          "entityName": "OrderItem",
+          "schema": {
+            "$ref": "#/backend/entities/OrderItem"
+          },
+          "description": "Stores order item information for a specific order.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            },
+            {
+              "name": "orderId",
+              "description": "Unique identifier for the order."
+            },
+            {
+              "name": "orderItemId",
+              "description": "Unique identifier for the order item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/reviews/{reviewId}",
+        "definition": {
+          "entityName": "Review",
+          "schema": {
+            "$ref": "#/backend/entities/Review"
+          },
+          "description": "Stores product reviews.  'productId' allows querying reviews for a specific product.",
+          "params": [
+            {
+              "name": "reviewId",
+              "description": "Unique identifier for the review."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to support a dynamic e-commerce platform (BBS Entertainment) with a React.js frontend and Node.js backend. Key considerations include authorization independence, clarity of intent, and scalable security rules. The structure emphasizes segregation of data based on access needs and denormalization of authorization data to avoid costly `get()` calls in security rules.\n\n1.  **Authorization Independence**: To ensure authorization independence (avoiding `get()` calls in security rules), the design prioritizes denormalization. User-specific data (e.g., orders, reviews) are nested under the `/users/{userId}` path to clearly establish ownership. Collaborative data scenarios are addressed with membership maps. Denormalization is applied for shared attributes.\n\n2.  **Clarity of Intent**: Path-based ownership (`/users/{userId}/orders/{orderId}`) clearly indicates ownership. Standardized field names (`userId`, `productId`) and explicit state modeling (using a `status` field) enhance readability and debuggability.\n\n3.  **DBAC (Database-Based Access Control)**: Roles are managed through the existence of documents in dedicated collections like `/roles_admin/{uid}`. This avoids reliance on custom claims.\n\n4.  **QAPs (Rules are not Filters)**: Segregation of data based on access needs (e.g., user-specific data under `/users/{userId}`) ensures that list operations can be secured without filtering.\n\n5.  **Invariants**: The structure supports invariants through path-based ownership and data integrity. Timestamps and denormalized data (e.g., user details in order documents) can be validated in security rules.\n\n*   **Products and Categories**: Products and categories are stored in top-level collections (`/products`, `/categories`) for easy access and listing. The `categoryId` within the `Product` entity establishes the relationship.  Consider creating a `product_categories` collection to list the products that belong to one category. This simplifies listing the products associated with a specific category.\n*   **Users and User-Owned Data**: User-specific data (orders, reviews) are stored under the `/users/{userId}` collection to clearly define ownership and simplify security rules.\n*   **Reviews**: Reviews are stored under the `/reviews/{reviewId}` collection. The `productId` field allows to query reviews of a product.\n\nThis structure achieves authorization independence by avoiding hierarchical authorization dependencies. Each collection's security posture is homogeneous, simplifying rules. The design supports the required QAPs through segregation and ownership models, ensuring secure list operations. Invariants such as ownership and timestamps are enforced through the data structure."
+  }
+}

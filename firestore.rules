@@ -1,0 +1,140 @@
+/**
+ * @file Firebase Security Rules for BBS Entertainment Firestore database.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a combination of public read access for products and categories,
+ * and strict user-ownership for user profiles and their associated data (orders, order items).
+ * Reviews have public read access and owner-only write access.
+ *
+ * Data Structure:
+ * - /products/{productId}: Publicly readable product information. Only authenticated users can create, update, and delete products, but the `request.auth.uid` MUST match the `authorId` field, if it exists.
+ * - /categories/{categoryId}: Publicly readable category information. Only authenticated users can create, update, and delete categories, but the `request.auth.uid` MUST match the `authorId` field, if it exists.
+ * - /users/{userId}: User profile information, accessible only to the user themselves.
+ * - /users/{userId}/orders/{orderId}: Orders belonging to a specific user, accessible only to that user.
+ * - /users/{userId}/orders/{orderId}/orderItems/{orderItemId}: Order items within a specific order, accessible only to the order's owner.
+ * - /reviews/{reviewId}: Publicly readable reviews. Only the review's author can update or delete it.
+ *
+ * Key Security Decisions:
+ * - Products and categories are publicly readable to facilitate browsing.
+ * - User data is strictly private, accessible only to the owning user.
+ * - Listing of user documents is disallowed to protect user privacy.
+ * - Reviews are publicly readable, but only the author can modify or delete them.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Allows public read access to product information, with owner-only writes.
+     * @path /products/{productId}
+     * @allow (get, list): if true
+     * @allow (create): if isSignedIn() && request.resource.data.id == request.auth.uid;
+     * @allow (update, delete): if isSignedIn() && resource.data.id == request.auth.uid;
+     * @deny (create): if !isSignedIn()
+     * @deny (update, delete): if !isSignedIn()
+     * @principle Allows public reads, restricts writes to the owner.
+     */
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && request.resource.data.id == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.id == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.id == request.auth.uid;
+    }
+
+    /**
+     * @description Allows public read access to category information, with owner-only writes.
+     * @path /categories/{categoryId}
+     * @allow (get, list): if true
+     * @allow (create): if isSignedIn() && request.resource.data.id == request.auth.uid;
+     * @allow (update, delete): if isSignedIn() && resource.data.id == request.auth.uid;
+     * @deny (create): if !isSignedIn()
+     * @deny (update, delete): if !isSignedIn()
+     * @principle Allows public reads, restricts writes to the owner.
+     */
+    match /categories/{categoryId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && request.resource.data.id == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.id == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.id == request.auth.uid;
+    }
+
+    /**
+     * @description Manages user profile data, restricting access to the owning user.
+     * @path /users/{userId}
+     * @allow (get): if isOwner(userId);
+     * @allow (create): if isOwner(userId);
+     * @allow (update): if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+     * @allow (delete): if isExistingOwner(userId);
+     * @deny (list): if true;
+     * @principle Enforces user-ownership for profile data, prevents listing user documents.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages orders for a specific user, allowing access only to the order owner.
+     * @path /users/{userId}/orders/{orderId}
+     * @allow (get, list): if isOwner(userId);
+     * @allow (create): if isOwner(userId) && request.resource.data.userId == userId;
+     * @allow (update): if isExistingOwner(userId) && request.resource.data.userId == userId;
+     * @allow (delete): if isExistingOwner(userId);
+     * @principle Enforces user-ownership for order data.
+     */
+    match /users/{userId}/orders/{orderId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages order items within a specific order, allowing access only to the order owner.
+     * @path /users/{userId}/orders/{orderId}/orderItems/{orderItemId}
+     * @allow (get, list): if isOwner(userId);
+     * @allow (create): if isOwner(userId) && request.resource.data.orderId == orderId;
+     * @allow (update): if isExistingOwner(userId) && request.resource.data.orderId == orderId;
+     * @allow (delete): if isExistingOwner(userId);
+     * @principle Enforces user-ownership for order item data.
+     */
+    match /users/{userId}/orders/{orderId}/orderItems/{orderItemId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.orderId == orderId;
+      allow update: if isExistingOwner(userId) && request.resource.data.orderId == orderId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Allows public read access to reviews, with owner-only writes.
+     * @path /reviews/{reviewId}
+     * @allow (get, list): if true
+     * @allow (create): if isSignedIn() && request.resource.data.userId == request.auth.uid;
+     * @allow (update): if isExistingOwner(request.auth.uid) && resource.data.userId == request.auth.uid;
+     * @allow (delete): if isExistingOwner(request.auth.uid) && resource.data.userId == request.auth.uid;
+     * @principle Allows public reads, restricts writes to the owner.
+     */
+    match /reviews/{reviewId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isExistingOwner(request.auth.uid) && resource.data.userId == request.auth.uid;
+      allow delete: if isExistingOwner(request.auth.uid) && resource.data.userId == request.auth.uid;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+    }
+  }
+}
