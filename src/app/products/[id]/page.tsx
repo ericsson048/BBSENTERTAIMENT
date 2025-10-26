@@ -2,7 +2,7 @@
 
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getProductById } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
@@ -12,14 +12,22 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Minus, Plus, ShoppingCart, Star, StarHalf } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import type { Product } from '@/lib/types';
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const product = getProductById(params.id);
+  const [product, setProduct] = useState<Product | undefined>(undefined);
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
 
+  useEffect(() => {
+    if (params.id) {
+      getProductById(params.id).then(setProduct);
+    }
+  }, [params.id]);
+
   if (!product) {
-    notFound();
+    // You might want to show a loading indicator here
+    return <div>Loading...</div>;
   }
   
   const handleAddToCart = () => {

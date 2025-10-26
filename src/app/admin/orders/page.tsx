@@ -1,3 +1,4 @@
+'use client';
 import { getOrders } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,9 +8,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, File, ListFilter } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Order } from '@/lib/types';
 
 export default function AdminOrdersPage() {
-  const orders = getOrders();
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    getOrders().then(setOrders);
+  }, []);
 
   return (
     <Card>

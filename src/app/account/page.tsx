@@ -1,4 +1,5 @@
-import { getOrders, getProducts, getUsers } from '@/lib/data';
+'use client';
+import { getOrdersByUserId, getProductsByIds, getUsers } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,11 +9,41 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import ProductCard from '@/components/product-card';
 import { FileText, Heart, User as UserIcon } from 'lucide-react';
 import Image from 'next/image';
+import { useUser } from '@/firebase';
+import { useEffect, useState } from 'react';
+import { Order, Product, User } from '@/lib/types';
 
 export default function AccountPage() {
-  const user = getUsers()[0]; // Mock user
-  const orders = getOrders().filter(o => o.customerName === user.name);
-  const favoriteProducts = [getProducts()[0], getProducts()[2], getProducts()[4]]; // Mock favorites
+  const { user: authUser, isUserLoading } = useUser();
+  const [user, setUser] = useState<User | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([]);
+  
+  useEffect(() => {
+    async function fetchData() {
+      if (authUser) {
+        // In a real app, you'd fetch the user profile from your DB using authUser.uid
+        const users = await getUsers();
+        const currentUser = users[0]; // Mock: find user by authUser.uid
+        setUser(currentUser);
+
+        const userOrders = await getOrdersByUserId(currentUser.id);
+        setOrders(userOrders);
+
+        // Mock favorite products
+        const favIds = ['prod1', 'prod3', 'prod5']; // Replace with actual user favorite IDs
+        const favs = await getProductsByIds(favIds);
+        setFavoriteProducts(favs);
+      }
+    }
+    fetchData();
+  }, [authUser]);
+
+
+  if (isUserLoading || !user) {
+    return <div>Loading...</div>;
+  }
+
   const userAvatar = PlaceHolderImages.find(p => p.id === user.avatar);
 
   return (
@@ -70,7 +101,6 @@ export default function AccountPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {orders.length > 0 ? orders.map(order => {
-                const orderAvatar = PlaceHolderImages.find(p => p.id === order.customerAvatar);
                 return (
                   <Card key={order.id}>
                     <CardHeader className="flex flex-row items-center justify-between">

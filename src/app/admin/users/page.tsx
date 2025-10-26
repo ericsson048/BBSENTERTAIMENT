@@ -1,3 +1,4 @@
+'use client';
 import { getUsers } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -6,9 +7,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, File, ListFilter } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { User } from '@/lib/types';
 
 export default function AdminUsersPage() {
-  const users = getUsers();
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    getUsers().then(setUsers);
+  }, []);
+
 
   return (
     <Card>

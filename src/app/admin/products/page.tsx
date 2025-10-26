@@ -13,9 +13,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { generateProductDescription } from '@/ai/flows/admin-ai-generated-product-descriptions';
 import { useToast } from '@/hooks/use-toast';
+import { Product } from '@/lib/types';
 
 function AddProductDialog() {
     const { toast } = useToast();
@@ -100,7 +101,11 @@ function AddProductDialog() {
 
 
 export default function AdminProductsPage() {
-  const products = getProducts();
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    getProducts().then(setProducts);
+  }, []);
 
   return (
     <Card>

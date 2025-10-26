@@ -20,7 +20,11 @@ async function PersonalizedRecommendations() {
 
   try {
     const recommendations = await personalizedProductRecommendations(recommendationsInput);
-    const recommendedProducts = getProductsByIds(recommendations.productRecommendations);
+    const recommendedProducts = await getProductsByIds(recommendations.productRecommendations);
+
+    if (!recommendedProducts) {
+        return <p className="text-muted-foreground">Could not load recommendations at this time.</p>;
+    }
 
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -46,7 +50,7 @@ const categories = [
 
 export default async function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === "hero-home")!;
-  const featuredProducts = getFeaturedProducts();
+  const featuredProducts = await getFeaturedProducts();
 
   return (
     <div className="flex flex-col">

@@ -1,24 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getProducts, getCategories } from '@/lib/data';
 import ProductCard from '@/components/product-card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import type { Product, Category } from '@/lib/types';
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') || 'all';
 
-  const allProducts = getProducts();
-  const allCategories = getCategories();
-  const allBrands = [...new Set(allProducts.map(p => p.brand))];
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [allCategories, setAllCategories] = useState<Category[]>([]);
+  const [allBrands, setAllBrands] = useState<string[]>([]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedBrand, setSelectedBrand] = useState('all');
+
+  useEffect(() => {
+    getProducts().then(products => {
+      setAllProducts(products);
+      const uniqueBrands = [...new Set(products.map(p => p.brand))];
+      setAllBrands(uniqueBrands);
+    });
+    getCategories().then(setAllCategories);
+  }, []);
 
   const filteredProducts = allProducts.filter(product => {
     return (
@@ -69,7 +79,7 @@ export default function ProductsPage() {
                         <Select value={selectedBrand} onValueChange={setSelectedBrand}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a brand" />
-                            </SelectTrigger>
+                            </Trigger>
                             <SelectContent>
                                 <SelectItem value="all">All Brands</SelectItem>
                                 {allBrands.map(brand => (

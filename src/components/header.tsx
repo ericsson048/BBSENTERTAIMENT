@@ -1,8 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import { Search, ShoppingCart, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Logo from './logo';
+import { useUser } from '@/firebase';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -12,6 +16,8 @@ const navLinks = [
 ];
 
 export default function Header() {
+  const { user } = useUser();
+
   return (
     <header className="sticky top-0 z-50 hidden w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:block">
       <div className="container flex h-16 items-center">
@@ -44,7 +50,14 @@ export default function Header() {
           </Button>
           <Button variant="ghost" size="icon" asChild>
             <Link href="/account">
-              <User className="h-5 w-5" />
+              {user ? (
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.photoURL ?? undefined} />
+                  <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
+                </Avatar>
+              ) : (
+                <User className="h-5 w-5" />
+              )}
               <span className="sr-only">My Account</span>
             </Link>
           </Button>

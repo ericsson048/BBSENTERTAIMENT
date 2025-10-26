@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getProductById } from '@/lib/data';
@@ -13,14 +13,27 @@ import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 import type { CartItem } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
-const initialCartItems: CartItem[] = [
-  { product: getProductById('prod1')!, quantity: 1 },
-  { product: getProductById('prod3')!, quantity: 2 },
-];
+const initialCartProductIds = ['prod1', 'prod3'];
+
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const { toast } = useToast();
+
+   useEffect(() => {
+    const fetchCartItems = async () => {
+      const items: CartItem[] = [];
+      for (const id of initialCartProductIds) {
+        const product = await getProductById(id);
+        if (product) {
+          // Assuming quantity 1 for prod1 and 2 for prod3 as in the original static data
+          items.push({ product, quantity: id === 'prod3' ? 2 : 1 });
+        }
+      }
+      setCartItems(items);
+    };
+    fetchCartItems();
+  }, []);
 
   const updateQuantity = (productId: string, newQuantity: number) => {
     setCartItems(cartItems.map(item =>
