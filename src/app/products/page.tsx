@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ProductCard from '@/components/product-card';
 import { Input } from '@/components/ui/input';
@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import type { Product, Category } from '@/lib/types';
 import { useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
+import ProductCardSkeleton from '@/components/product-card-skeleton';
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
@@ -34,7 +35,8 @@ export default function ProductsPage() {
 
   const allBrands = useMemo(() => {
     if (!allProducts) return [];
-    return [...new Set(allProducts.map(p => p.brand))];
+    const brands = allProducts.map(p => p.brand).filter((b): b is string => !!b);
+    return [...new Set(brands)];
   }, [allProducts]);
 
   const filteredProducts = useMemo(() => {
@@ -47,9 +49,6 @@ export default function ProductsPage() {
     });
   }, [allProducts, searchTerm, selectedCategory, selectedBrand]);
 
-  if (productsLoading || categoriesLoading) {
-    return <div>Chargement des produits...</div>;
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -106,7 +105,11 @@ export default function ProductsPage() {
         </aside>
         
         <main className="col-span-1 md:col-span-3">
-          {filteredProducts && filteredProducts.length > 0 ? (
+          {(productsLoading || categoriesLoading) ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+            </div>
+          ) : filteredProducts && filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map(product => (
                 <ProductCard key={product.id} product={product} />

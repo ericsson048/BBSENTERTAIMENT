@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import Logo from './logo';
 import { useUser } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { ThemeToggler } from './theme-toggler';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -42,6 +43,7 @@ export default function Header() {
               className="w-full rounded-md bg-muted pl-9 md:w-[200px] lg:w-[300px]"
             />
           </div>
+          <ThemeToggler />
           <Button variant="ghost" size="icon" asChild>
             <Link href="/cart">
               <ShoppingCart className="h-5 w-5" />
