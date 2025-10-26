@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams }s from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import ProductCard from '@/components/product-card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,11 +21,13 @@ export default function ProductsPage() {
   const [selectedBrand, setSelectedBrand] = useState('all');
 
   const productsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
     return query(collection(firestore, 'products'));
   }, [firestore]);
   const { data: allProducts, isLoading: productsLoading } = useCollection<Product>(productsQuery);
 
   const categoriesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
     return query(collection(firestore, 'categories'));
   }, [firestore]);
   const { data: allCategories, isLoading: categoriesLoading } = useCollection<Category>(categoriesQuery);
@@ -38,11 +40,10 @@ export default function ProductsPage() {
   const filteredProducts = useMemo(() => {
     if (!allProducts) return [];
     return allProducts.filter(product => {
-      return (
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (selectedCategory === 'all' || product.category === selectedCategory) &&
-        (selectedBrand === 'all' || product.brand === selectedBrand)
-      );
+      const categoryMatch = selectedCategory === 'all' || product.categoryId === selectedCategory;
+      const brandMatch = selectedBrand === 'all' || product.brand === selectedBrand;
+      const searchMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+      return categoryMatch && brandMatch && searchMatch;
     });
   }, [allProducts, searchTerm, selectedCategory, selectedBrand]);
 
