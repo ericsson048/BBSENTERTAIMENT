@@ -1,42 +1,54 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { getProducts, getCategories } from '@/lib/data';
+import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams }s from 'next/navigation';
 import ProductCard from '@/components/product-card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import type { Product, Category } from '@/lib/types';
+import { useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') || 'all';
-
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [allCategories, setAllCategories] = useState<Category[]>([]);
-  const [allBrands, setAllBrands] = useState<string[]>([]);
+  const firestore = useFirestore();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedBrand, setSelectedBrand] = useState('all');
 
-  useEffect(() => {
-    getProducts().then(products => {
-      setAllProducts(products);
-      const uniqueBrands = [...new Set(products.map(p => p.brand))];
-      setAllBrands(uniqueBrands);
-    });
-    getCategories().then(setAllCategories);
-  }, []);
+  const productsQuery = useMemoFirebase(() => {
+    return query(collection(firestore, 'products'));
+  }, [firestore]);
+  const { data: allProducts, isLoading: productsLoading } = useCollection<Product>(productsQuery);
 
-  const filteredProducts = allProducts.filter(product => {
-    return (
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedCategory === 'all' || product.category === selectedCategory) &&
-      (selectedBrand === 'all' || product.brand === selectedBrand)
-    );
-  });
+  const categoriesQuery = useMemoFirebase(() => {
+    return query(collection(firestore, 'categories'));
+  }, [firestore]);
+  const { data: allCategories, isLoading: categoriesLoading } = useCollection<Category>(categoriesQuery);
+
+  const allBrands = useMemo(() => {
+    if (!allProducts) return [];
+    return [...new Set(allProducts.map(p => p.brand))];
+  }, [allProducts]);
+
+  const filteredProducts = useMemo(() => {
+    if (!allProducts) return [];
+    return allProducts.filter(product => {
+      return (
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (selectedCategory === 'all' || product.category === selectedCategory) &&
+        (selectedBrand === 'all' || product.brand === selectedBrand)
+      );
+    });
+  }, [allProducts, searchTerm, selectedCategory, selectedBrand]);
+
+  if (productsLoading || categoriesLoading) {
+    return <div>Chargement des produits...</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -66,7 +78,7 @@ export default function ProductsPage() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Categories</SelectItem>
-                                {allCategories.map(cat => (
+                                {allCategories?.map(cat => (
                                     <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                                 ))}
                             </SelectContent>
@@ -79,7 +91,7 @@ export default function ProductsPage() {
                         <Select value={selectedBrand} onValueChange={setSelectedBrand}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a brand" />
-                            </Trigger>
+                            </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Brands</SelectItem>
                                 {allBrands.map(brand => (
@@ -93,7 +105,7 @@ export default function ProductsPage() {
         </aside>
         
         <main className="col-span-1 md:col-span-3">
-          {filteredProducts.length > 0 ? (
+          {filteredProducts && filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map(product => (
                 <ProductCard key={product.id} product={product} />
