@@ -7,37 +7,53 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import ProductCard from '@/components/product-card';
-import { getFeaturedProducts, getProducts } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Product } from '@/lib/types';
 import ProductCardSkeleton from '@/components/product-card-skeleton';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where, limit, orderBy } from 'firebase/firestore';
+
+
+function FeaturedProducts() {
+  const firestore = useFirestore();
+  const productsQuery = useMemoFirebase(
+    () => firestore ? query(collection(firestore, 'products'), where('featured', '==', true), limit(4)) : null,
+    [firestore]
+  );
+  const { data: featuredProducts, isLoading } = useCollection<Product>(productsQuery);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+      </div>
+    );
+  }
+
+  if (!featuredProducts || featuredProducts.length === 0) {
+    return <p className="text-muted-foreground">No featured products available at the moment.</p>;
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {featuredProducts.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+}
+
 
 function TopRatedProducts() {
-  const [topProducts, setTopProducts] = useState<Product[] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const firestore = useFirestore();
 
-  useEffect(() => {
-    async function fetchTopProducts() {
-      try {
-        const allProducts = await getProducts();
-        if (allProducts) {
-          const sortedProducts = allProducts.sort((a, b) => b.rating - a.rating).slice(0, 4);
-          setTopProducts(sortedProducts);
-        } else {
-          setTopProducts([]);
-        }
-      } catch (err) {
-        console.error('Error fetching top rated products:', err);
-        setError('Could not load top products at this time.');
-      } finally {
-        setIsLoading(false);
-      }
-    }
+  const topProductsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "products"), orderBy("rating", "desc"), limit(4));
+  }, [firestore]);
 
-    fetchTopProducts();
-  }, []);
+  const { data: topProducts, isLoading, error } = useCollection<Product>(topProductsQuery);
 
   if (isLoading) {
     return (
@@ -48,7 +64,7 @@ function TopRatedProducts() {
   }
   
   if (error) {
-    return <p className="text-muted-foreground">{error}</p>;
+    return <p className="text-muted-foreground">Could not load top products at this time.</p>;
   }
 
   if (!topProducts || topProducts.length === 0) {
@@ -74,17 +90,7 @@ const categories = [
 ];
 
 export default function Home() {
-    const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const heroImage = PlaceHolderImages.find(p => p.id === "hero-home")!;
-
-    useEffect(() => {
-        getFeaturedProducts().then(products => {
-            setFeaturedProducts(products);
-            setIsLoading(false);
-        });
-    }, []);
-
 
   return (
     <div className="flex flex-col">
@@ -105,7 +111,7 @@ export default function Home() {
           <p className="mt-4 max-w-2xl text-lg text-gray-300">
             Discover the finest in audiovisual, multimedia, and entertainment gear.
           </p>
-          <Button asChild size="lg" className="mt-8 bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button asChild size="lg" className="mt-8">
             <Link href="/products">
               Shop Now <ArrowRight className="ml-2" />
             </Link>
@@ -134,23 +140,15 @@ export default function Home() {
 
       <Separator />
 
-      <section className="py-12 md:py-20 bg-background">
+      <section className="py-12 md:py-20 bg-muted/20">
         <div className="container mx-auto px-4">
           <h2 className="mb-2 text-center font-headline text-3xl md:text-4xl">Featured Products</h2>
            <p className="mb-10 text-center text-muted-foreground">Handpicked for you.</p>
-          {isLoading ? (
-             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}
-             </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
+          <FeaturedProducts />
         </div>
       </section>
+      
+      <Separator />
 
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
@@ -162,3 +160,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

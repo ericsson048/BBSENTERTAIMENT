@@ -47,6 +47,21 @@ function AccountPageSkeleton() {
                 </CardContent>
             </Card>
         </TabsContent>
+        <TabsContent value="favorites" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Favorites</CardTitle>
+              <CardDescription>Products you've saved for later.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <ProductCardSkeleton key={i} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   )
@@ -64,9 +79,7 @@ export default function AccountPage() {
   const ordersQuery = useMemoFirebase(() => authUser ? query(collection(firestore, 'orders'), where('userId', '==', authUser.uid)) : null, [firestore, authUser]);
   const { data: orders, isLoading: areOrdersLoading } = useCollection<Order>(ordersQuery);
 
-  // Mock favorite products
-  // In a real app, user.favoriteProductIds would come from the user document
-  const favoriteProductIds = useMemo(() => ['prod1', 'prod3', 'prod5'], []);
+  const favoriteProductIds = useMemo(() => user?.favoriteProductIds || [], [user]);
   const favsQuery = useMemoFirebase(() => (firestore && favoriteProductIds.length > 0) ? query(collection(firestore, 'products'), where('id', 'in', favoriteProductIds)) : null, [firestore, favoriteProductIds]);
   const { data: favoriteProducts, isLoading: areFavsLoading } = useCollection<Product>(favsQuery);
   
@@ -77,10 +90,12 @@ export default function AccountPage() {
   }, [authUser, isUserLoading, router]);
 
   const handleLogout = () => {
-    signOut(auth);
+    if (auth) {
+        signOut(auth);
+    }
   };
 
-  const isLoading = isUserLoading || isUserDocLoading || areOrdersLoading || areFavsLoading;
+  const isLoading = isUserLoading || isUserDocLoading;
 
   if (isLoading || !user) {
     return <AccountPageSkeleton />;
@@ -145,7 +160,11 @@ export default function AccountPage() {
               <CardDescription>A list of your past and current orders.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {orders && orders.length > 0 ? orders.map(order => {
+              {areOrdersLoading ? (
+                 Array.from({ length: 2 }).map((_, i) => (
+                    <Card key={i}><CardContent className="p-4"><Skeleton className="h-24 w-full" /></CardContent></Card>
+                 ))
+              ) : orders && orders.length > 0 ? orders.map(order => {
                 return (
                   <Card key={order.id}>
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -183,7 +202,13 @@ export default function AccountPage() {
                     <CardDescription>Products you've saved for later.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {favoriteProducts && favoriteProducts.length > 0 ? (
+                    {areFavsLoading ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {Array.from({ length: favoriteProductIds.length || 3 }).map((_, i) => (
+                                <ProductCardSkeleton key={i} />
+                            ))}
+                        </div>
+                    ) : favoriteProducts && favoriteProducts.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {favoriteProducts.map(product => (
                                 <ProductCard key={product.id} product={product} />
@@ -200,3 +225,5 @@ export default function AccountPage() {
     </div>
   );
 }
+
+    

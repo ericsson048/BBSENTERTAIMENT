@@ -40,9 +40,12 @@ export type User = {
     avatar: string;
     orderCount: number;
     isAdmin?: boolean;
+    favoriteProductIds?: string[];
 };
 
 export type CartItem = {
   product: Product;
   quantity: number;
 };
+
+    
