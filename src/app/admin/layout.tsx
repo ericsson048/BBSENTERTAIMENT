@@ -12,7 +12,7 @@ import Logo from '@/components/logo';
 import { useUser } from '@/firebase';
 import { useEffect } from 'react';
 import { doc } from 'firebase/firestore';
-import { useFirestore, useDoc } from '@/firebase';
+import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import type { User as AppUser } from '@/lib/types';
 
 
@@ -29,7 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user: authUser, isUserLoading } = useUser();
   const firestore = useFirestore();
   
-  const userDocRef = authUser ? doc(firestore, 'users', authUser.uid) : null;
+  const userDocRef = useMemoFirebase(() => authUser ? doc(firestore, 'users', authUser.uid) : null, [firestore, authUser]);
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<AppUser>(userDocRef);
   
   useEffect(() => {
@@ -39,20 +39,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [authUser, userProfile, isUserLoading, isProfileLoading, router]);
 
+  const isLoading = isUserLoading || isProfileLoading;
+
   // Show a loading state while we verify auth and admin status
-  if (isUserLoading || isProfileLoading) {
+  if (isLoading || !userProfile?.isAdmin) {
       return (
         <div className="flex h-screen items-center justify-center">
             <div>Loading Admin...</div>
         </div>
       )
   }
-  
-  // If user is not an admin, they will be redirected, so we can return null.
-  if (!userProfile?.isAdmin) {
-    return null;
-  }
-
 
   const NavContent = () => (
      <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
@@ -111,7 +107,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Button variant="secondary" size="icon" className="rounded-full">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={authUser?.photoURL || "https://picsum.photos/seed/admin/100/100"} />
-                  <AvatarFallback>{userProfile?.name?.charAt(0) || 'A'}</AvatarFallback>
+                  <AvatarFallback>{userProfile?.firstName?.charAt(0) || 'A'}</AvatarFallback>
                 </Avatar>
                 <span className="sr-only">Toggle user menu</span>
               </Button>
