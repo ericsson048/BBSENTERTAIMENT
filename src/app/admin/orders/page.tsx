@@ -10,11 +10,20 @@ import { Button } from '@/components/ui/button';
 import { MoreHorizontal, File, ListFilter } from 'lucide-react';
 import { Order } from '@/lib/types';
 import { collection } from 'firebase/firestore';
+import { useAdminAuth } from '../layout'; // Import the new hook
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminOrdersPage() {
   const firestore = useFirestore();
-  const ordersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'orders') : null, [firestore]);
-  const { data: orders } = useCollection<Order>(ordersQuery);
+  const { isAuthorized, isLoading: isAuthLoading } = useAdminAuth();
+
+  const ordersQuery = useMemoFirebase(
+    () => (firestore && isAuthorized ? collection(firestore, 'orders') : null),
+    [firestore, isAuthorized]
+  );
+  const { data: orders, isLoading: isOrdersLoading } = useCollection<Order>(ordersQuery);
+
+  const isLoading = isAuthLoading || isOrdersLoading;
 
   return (
     <Card>
@@ -54,7 +63,17 @@ export default function AdminOrdersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {orders?.map(order => {
+            {isLoading ? (
+                 Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell><Skeleton className="h-10 w-32" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                    </TableRow>
+                 ))
+            ) : orders?.map(order => {
               const avatar = PlaceHolderImages.find(p => p.id === order.customerAvatar);
               return (
                 <TableRow key={order.id}>
