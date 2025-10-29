@@ -168,19 +168,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
     );
   }
-
-  if (!isAuthorized) {
-    // This is a fallback while redirecting
-    return (
+  
+  return (
+    <AdminAuthContext.Provider value={authContextValue}>
+      {isAuthorized ? <AdminLayoutContent>{children}</AdminLayoutContent> : (
         <div className="flex h-screen w-full items-center justify-center">
             <div>Redirecting...</div>
         </div>
-    );
-  }
-
-  return (
-    <AdminAuthContext.Provider value={authContextValue}>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
+      )}
     </AdminAuthContext.Provider>
   );
 }

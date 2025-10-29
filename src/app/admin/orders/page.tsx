@@ -25,6 +25,10 @@ export default function AdminOrdersPage() {
 
   const isLoading = isAuthLoading || isOrdersLoading;
 
+  if (!isAuthorized && !isLoading) {
+    return null; // Don't render anything if not authorized and not loading
+  }
+
   return (
     <Card>
       <CardHeader>
