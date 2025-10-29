@@ -39,6 +39,7 @@ export type User = {
     joined: string;
     avatar: string;
     orderCount: number;
+    isAdmin?: boolean;
 };
 
 export type CartItem = {
