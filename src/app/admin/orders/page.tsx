@@ -1,5 +1,5 @@
 'use client';
-import { getOrders } from '@/lib/data';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -8,15 +8,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, File, ListFilter } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { Order } from '@/lib/types';
+import { collection } from 'firebase/firestore';
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-
-  useEffect(() => {
-    getOrders().then(setOrders);
-  }, []);
+  const firestore = useFirestore();
+  const ordersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'orders') : null, [firestore]);
+  const { data: orders } = useCollection<Order>(ordersQuery);
 
   return (
     <Card>
@@ -56,7 +54,7 @@ export default function AdminOrdersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {orders.map(order => {
+            {orders?.map(order => {
               const avatar = PlaceHolderImages.find(p => p.id === order.customerAvatar);
               return (
                 <TableRow key={order.id}>

@@ -45,6 +45,15 @@ export const getUsers = async () => {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
 }
 
+export const getUserByUid = async (uid: string): Promise<User | null> => {
+    const userDocRef = doc(firestore, 'users', uid);
+    const userDoc = await getDoc(userDocRef);
+    if (userDoc.exists()) {
+        return { id: userDoc.id, ...userDoc.data() } as User;
+    }
+    return null;
+}
+
 export const getOrders = async () => {
     const snapshot = await getDocs(ordersCol);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
