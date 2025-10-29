@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Film, Headphones, Gamepad, Clapperboard, Music, Radio } from 'lucide-react';
@@ -8,35 +10,67 @@ import ProductCard from '@/components/product-card';
 import { getFeaturedProducts, getProductsByIds } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { personalizedProductRecommendations } from '@/ai/flows/personalized-product-recommendations';
+import { useEffect, useState } from 'react';
+import { Product } from '@/lib/types';
+import ProductCardSkeleton from '@/components/product-card-skeleton';
 
-async function PersonalizedRecommendations() {
-  // Mock user data for personalized recommendations
-  const recommendationsInput = {
-    userId: 'user123',
-    browsingHistory: ['prod1', 'prod3'],
-    purchaseHistory: ['prod5'],
-    preferences: 'Interested in high-quality audio and vintage cameras.'
-  };
+function PersonalizedRecommendations() {
+  const [recommendedProducts, setRecommendedProducts] = useState<Product[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  try {
-    const recommendations = await personalizedProductRecommendations(recommendationsInput);
-    const recommendedProducts = await getProductsByIds(recommendations.productRecommendations);
+  useEffect(() => {
+    async function fetchRecommendations() {
+      // Mock user data for personalized recommendations
+      const recommendationsInput = {
+        userId: 'user123',
+        browsingHistory: ['prod1', 'prod3'],
+        purchaseHistory: ['prod5'],
+        preferences: 'Interested in high-quality audio and vintage cameras.'
+      };
 
-    if (!recommendedProducts) {
-        return <p className="text-muted-foreground">Could not load recommendations at this time.</p>;
+      try {
+        const recommendations = await personalizedProductRecommendations(recommendationsInput);
+        if (recommendations && recommendations.productRecommendations) {
+            const products = await getProductsByIds(recommendations.productRecommendations);
+            setRecommendedProducts(products);
+        } else {
+            setRecommendedProducts([]);
+        }
+      } catch (err) {
+        console.error('Error fetching personalized recommendations:', err);
+        setError('Could not load recommendations at this time.');
+      } finally {
+        setIsLoading(false);
+      }
     }
 
+    fetchRecommendations();
+  }, []); // Empty dependency array ensures this runs only once on the client
+
+  if (isLoading) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {recommendedProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+        {Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}
       </div>
     );
-  } catch (error) {
-    console.error('Error fetching personalized recommendations:', error);
-    return <p className="text-muted-foreground">Could not load recommendations at this time.</p>;
   }
+  
+  if (error) {
+    return <p className="text-muted-foreground">{error}</p>;
+  }
+
+  if (!recommendedProducts || recommendedProducts.length === 0) {
+    return <p className="text-muted-foreground">No recommendations for you right now. Explore our products!</p>;
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {recommendedProducts.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
 }
 
 const categories = [
@@ -48,9 +82,18 @@ const categories = [
   { name: 'Broadcasting', icon: Radio, href: '/products?category=broadcasting' },
 ];
 
-export default async function Home() {
-  const heroImage = PlaceHolderImages.find(p => p.id === "hero-home")!;
-  const featuredProducts = await getFeaturedProducts();
+export default function Home() {
+    const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const heroImage = PlaceHolderImages.find(p => p.id === "hero-home")!;
+
+    useEffect(() => {
+        getFeaturedProducts().then(products => {
+            setFeaturedProducts(products);
+            setIsLoading(false);
+        });
+    }, []);
+
 
   return (
     <div className="flex flex-col">
@@ -104,11 +147,17 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <h2 className="mb-2 text-center font-headline text-3xl md:text-4xl">Featured Products</h2>
            <p className="mb-10 text-center text-muted-foreground">Handpicked for you.</p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {isLoading ? (
+             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+             </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
