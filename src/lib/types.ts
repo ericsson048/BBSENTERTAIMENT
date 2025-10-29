@@ -4,14 +4,14 @@ export type Product = {
   description: string;
   price: number;
   salePrice?: number;
-  category: string;
-  brand: string;
+  categoryId: string;
+  brand?: string;
   stock: number;
   images: string[];
   rating: number;
   reviews: number;
   tags: string[];
-  featured: boolean;
+  featured?: boolean;
 };
 
 export type Category = {
