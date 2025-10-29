@@ -7,46 +7,37 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import ProductCard from '@/components/product-card';
-import { getFeaturedProducts, getProductsByIds } from '@/lib/data';
+import { getFeaturedProducts, getProducts } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { personalizedProductRecommendations } from '@/ai/flows/personalized-product-recommendations';
 import { useEffect, useState } from 'react';
 import { Product } from '@/lib/types';
 import ProductCardSkeleton from '@/components/product-card-skeleton';
 
-function PersonalizedRecommendations() {
-  const [recommendedProducts, setRecommendedProducts] = useState<Product[] | null>(null);
+function TopRatedProducts() {
+  const [topProducts, setTopProducts] = useState<Product[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchRecommendations() {
-      // Mock user data for personalized recommendations
-      const recommendationsInput = {
-        userId: 'user123',
-        browsingHistory: ['prod1', 'prod3'],
-        purchaseHistory: ['prod5'],
-        preferences: 'Interested in high-quality audio and vintage cameras.'
-      };
-
+    async function fetchTopProducts() {
       try {
-        const recommendations = await personalizedProductRecommendations(recommendationsInput);
-        if (recommendations && recommendations.productRecommendations) {
-            const products = await getProductsByIds(recommendations.productRecommendations);
-            setRecommendedProducts(products);
+        const allProducts = await getProducts();
+        if (allProducts) {
+          const sortedProducts = allProducts.sort((a, b) => b.rating - a.rating).slice(0, 4);
+          setTopProducts(sortedProducts);
         } else {
-            setRecommendedProducts([]);
+          setTopProducts([]);
         }
       } catch (err) {
-        console.error('Error fetching personalized recommendations:', err);
-        setError('Could not load recommendations at this time.');
+        console.error('Error fetching top rated products:', err);
+        setError('Could not load top products at this time.');
       } finally {
         setIsLoading(false);
       }
     }
 
-    fetchRecommendations();
-  }, []); // Empty dependency array ensures this runs only once on the client
+    fetchTopProducts();
+  }, []);
 
   if (isLoading) {
     return (
@@ -60,13 +51,13 @@ function PersonalizedRecommendations() {
     return <p className="text-muted-foreground">{error}</p>;
   }
 
-  if (!recommendedProducts || recommendedProducts.length === 0) {
-    return <p className="text-muted-foreground">No recommendations for you right now. Explore our products!</p>;
+  if (!topProducts || topProducts.length === 0) {
+    return <p className="text-muted-foreground">No products found. Explore our products!</p>;
   }
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-      {recommendedProducts.map((product) => (
+      {topProducts.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>
@@ -163,9 +154,9 @@ export default function Home() {
 
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="mb-2 text-center font-headline text-3xl md:text-4xl">For You</h2>
-          <p className="mb-10 text-center text-muted-foreground">Personalized recommendations based on your activity.</p>
-          <PersonalizedRecommendations />
+          <h2 className="mb-2 text-center font-headline text-3xl md:text-4xl">Top Rated Products</h2>
+          <p className="mb-10 text-center text-muted-foreground">Discover what our customers love the most.</p>
+          <TopRatedProducts />
         </div>
       </section>
     </div>
