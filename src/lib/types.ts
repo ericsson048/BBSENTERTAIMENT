@@ -34,7 +34,8 @@ export type Order = {
 
 export type User = {
     id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     joined: string;
     avatar: string;

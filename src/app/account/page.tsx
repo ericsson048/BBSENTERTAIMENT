@@ -102,16 +102,17 @@ export default function AccountPage() {
   }
 
   const userAvatar = PlaceHolderImages.find(p => p.id === user.avatar);
+  const displayName = `${user.firstName} ${user.lastName}`;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
         <Avatar className="h-24 w-24">
-          {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt={user.name} />}
-          <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+          {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt={displayName} />}
+          <AvatarFallback>{user.firstName?.charAt(0)}{user.lastName?.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="text-center md:text-left">
-          <h1 className="font-headline text-3xl md:text-4xl">{user.name}</h1>
+          <h1 className="font-headline text-3xl md:text-4xl">{displayName}</h1>
           <p className="text-muted-foreground">{user.email}</p>
           <p className="text-sm text-muted-foreground">Joined: {user.joined}</p>
           <div className="flex gap-2 mt-4">
@@ -137,7 +138,7 @@ export default function AccountPage() {
                 <CardContent className="space-y-4">
                     <div className="flex justify-between items-center">
                         <span className="font-medium">Name:</span>
-                        <span>{user.name}</span>
+                        <span>{displayName}</span>
                     </div>
                     <Separator/>
                     <div className="flex justify-between items-center">
@@ -225,5 +226,3 @@ export default function AccountPage() {
     </div>
   );
 }
-
-    

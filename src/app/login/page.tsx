@@ -17,8 +17,10 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleSignIn = () => {
-    initiateEmailSignIn(auth, email, password);
-    router.push('/account');
+    if (auth) {
+      initiateEmailSignIn(auth, email, password);
+      router.push('/account');
+    }
   };
 
   return (
@@ -45,7 +47,7 @@ export default function LoginPage() {
           <Button className="w-full" onClick={handleSignIn}>Sign In</Button>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Don't have an account?{' '}
-            <Link href="#" className="underline text-primary/80 hover:text-primary">
+            <Link href="/signup" className="underline text-primary/80 hover:text-primary">
               Sign up
             </Link>
           </p>
