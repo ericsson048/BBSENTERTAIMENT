@@ -13,21 +13,40 @@ import { Badge } from '@/components/ui/badge';
 import { Minus, Plus, ShoppingCart, Star, StarHalf } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Product } from '@/lib/types';
+import ProductCardSkeleton from '@/components/product-card-skeleton';
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const [product, setProduct] = useState<Product | undefined>(undefined);
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (params.id) {
-      getProductById(params.id).then(setProduct);
+      setIsLoading(true);
+      getProductById(params.id).then(p => {
+        setProduct(p);
+        setIsLoading(false);
+      });
     }
   }, [params.id]);
 
+  if (isLoading) {
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                <ProductCardSkeleton />
+                <div className="space-y-4">
+                    <ProductCardSkeleton />
+                    <ProductCardSkeleton />
+                </div>
+            </div>
+        </div>
+    )
+  }
+
   if (!product) {
-    // You might want to show a loading indicator here
-    return <div>Loading...</div>;
+    notFound();
   }
   
   const handleAddToCart = () => {
@@ -50,9 +69,41 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       </div>
     );
   };
+  
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description,
+    image: PlaceHolderImages.find(p => p.id === product.images[0])?.imageUrl,
+    brand: {
+        '@type': 'Brand',
+        name: product.brand,
+    },
+    offers: {
+        '@type': 'Offer',
+        priceCurrency: 'USD',
+        price: product.salePrice ?? product.price,
+        itemCondition: 'https://schema.org/NewCondition',
+        availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        seller: {
+            '@type': 'Organization',
+            name: 'BBS Entertainment',
+        },
+    },
+    aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: product.rating,
+        reviewCount: product.reviews,
+    },
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
+       <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
           <Carousel className="w-full">

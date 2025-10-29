@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Bell, Home, Package, ShoppingCart, Users, User, Power, Clapperboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,6 +9,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import Logo from '@/components/logo';
+import { useUser } from '@/firebase';
+import { useEffect } from 'react';
+import { doc } from 'firebase/firestore';
+import { useFirestore, useDoc } from '@/firebase';
+import type { User as AppUser } from '@/lib/types';
+
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: Home },
@@ -19,6 +25,34 @@ const navItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user: authUser, isUserLoading } = useUser();
+  const firestore = useFirestore();
+  
+  const userDocRef = authUser ? doc(firestore, 'users', authUser.uid) : null;
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<AppUser>(userDocRef);
+  
+  useEffect(() => {
+    // If not loading and user is not authenticated or not an admin, redirect
+    if (!isUserLoading && !isProfileLoading && (!authUser || !userProfile?.isAdmin)) {
+      router.push('/');
+    }
+  }, [authUser, userProfile, isUserLoading, isProfileLoading, router]);
+
+  // Show a loading state while we verify auth and admin status
+  if (isUserLoading || isProfileLoading) {
+      return (
+        <div className="flex h-screen items-center justify-center">
+            <div>Loading Admin...</div>
+        </div>
+      )
+  }
+  
+  // If user is not an admin, they will be redirected, so we can return null.
+  if (!userProfile?.isAdmin) {
+    return null;
+  }
+
 
   const NavContent = () => (
      <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
@@ -76,8 +110,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="https://picsum.photos/seed/admin/100/100" />
-                  <AvatarFallback>A</AvatarFallback>
+                  <AvatarImage src={authUser?.photoURL || "https://picsum.photos/seed/admin/100/100"} />
+                  <AvatarFallback>{userProfile?.name?.charAt(0) || 'A'}</AvatarFallback>
                 </Avatar>
                 <span className="sr-only">Toggle user menu</span>
               </Button>

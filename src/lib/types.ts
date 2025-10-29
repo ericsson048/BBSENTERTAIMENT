@@ -4,14 +4,14 @@ export type Product = {
   description: string;
   price: number;
   salePrice?: number;
-  category: string;
-  brand: string;
+  categoryId: string;
+  brand?: string;
   stock: number;
   images: string[];
   rating: number;
   reviews: number;
   tags: string[];
-  featured: boolean;
+  featured?: boolean;
 };
 
 export type Category = {
@@ -34,14 +34,20 @@ export type Order = {
 
 export type User = {
     id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     joined: string;
     avatar: string;
     orderCount: number;
+    isAdmin?: boolean;
+    favoriteProductIds?: string[];
+    name?: string; // name is a combination of firstName and lastName
 };
 
 export type CartItem = {
   product: Product;
   quantity: number;
 };
+
+    

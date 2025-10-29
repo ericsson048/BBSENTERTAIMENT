@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Film, Headphones, Gamepad, Clapperboard, Music, Radio } from 'lucide-react';
@@ -5,38 +7,77 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import ProductCard from '@/components/product-card';
-import { getFeaturedProducts, getProductsByIds } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { personalizedProductRecommendations } from '@/ai/flows/personalized-product-recommendations';
+import { useEffect, useState, useMemo } from 'react';
+import { Product } from '@/lib/types';
+import ProductCardSkeleton from '@/components/product-card-skeleton';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where, limit, orderBy } from 'firebase/firestore';
 
-async function PersonalizedRecommendations() {
-  // Mock user data for personalized recommendations
-  const recommendationsInput = {
-    userId: 'user123',
-    browsingHistory: ['prod1', 'prod3'],
-    purchaseHistory: ['prod5'],
-    preferences: 'Interested in high-quality audio and vintage cameras.'
-  };
 
-  try {
-    const recommendations = await personalizedProductRecommendations(recommendationsInput);
-    const recommendedProducts = await getProductsByIds(recommendations.productRecommendations);
+function FeaturedProducts() {
+  const firestore = useFirestore();
+  const productsQuery = useMemoFirebase(
+    () => firestore ? query(collection(firestore, 'products'), where('featured', '==', true), limit(4)) : null,
+    [firestore]
+  );
+  const { data: featuredProducts, isLoading } = useCollection<Product>(productsQuery);
 
-    if (!recommendedProducts) {
-        return <p className="text-muted-foreground">Could not load recommendations at this time.</p>;
-    }
-
+  if (isLoading) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {recommendedProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+        {Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}
       </div>
     );
-  } catch (error) {
-    console.error('Error fetching personalized recommendations:', error);
-    return <p className="text-muted-foreground">Could not load recommendations at this time.</p>;
   }
+
+  if (!featuredProducts || featuredProducts.length === 0) {
+    return <p className="text-muted-foreground">No featured products available at the moment.</p>;
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {featuredProducts.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+}
+
+
+function TopRatedProducts() {
+  const firestore = useFirestore();
+
+  const topProductsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "products"), orderBy("rating", "desc"), limit(4));
+  }, [firestore]);
+
+  const { data: topProducts, isLoading, error } = useCollection<Product>(topProductsQuery);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+      </div>
+    );
+  }
+  
+  if (error) {
+    return <p className="text-muted-foreground">Could not load top products at this time.</p>;
+  }
+
+  if (!topProducts || topProducts.length === 0) {
+    return <p className="text-muted-foreground">No products found. Explore our products!</p>;
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {topProducts.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
 }
 
 const categories = [
@@ -48,9 +89,8 @@ const categories = [
   { name: 'Broadcasting', icon: Radio, href: '/products?category=broadcasting' },
 ];
 
-export default async function Home() {
-  const heroImage = PlaceHolderImages.find(p => p.id === "hero-home")!;
-  const featuredProducts = await getFeaturedProducts();
+export default function Home() {
+    const heroImage = PlaceHolderImages.find(p => p.id === "hero-home")!;
 
   return (
     <div className="flex flex-col">
@@ -71,7 +111,7 @@ export default async function Home() {
           <p className="mt-4 max-w-2xl text-lg text-gray-300">
             Discover the finest in audiovisual, multimedia, and entertainment gear.
           </p>
-          <Button asChild size="lg" className="mt-8 bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button asChild size="lg" className="mt-8">
             <Link href="/products">
               Shop Now <ArrowRight className="ml-2" />
             </Link>
@@ -100,25 +140,25 @@ export default async function Home() {
 
       <Separator />
 
-      <section className="py-12 md:py-20 bg-background">
+      <section className="py-12 md:py-20 bg-muted/20">
         <div className="container mx-auto px-4">
           <h2 className="mb-2 text-center font-headline text-3xl md:text-4xl">Featured Products</h2>
            <p className="mb-10 text-center text-muted-foreground">Handpicked for you.</p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <FeaturedProducts />
         </div>
       </section>
+      
+      <Separator />
 
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="mb-2 text-center font-headline text-3xl md:text-4xl">For You</h2>
-          <p className="mb-10 text-center text-muted-foreground">Personalized recommendations based on your activity.</p>
-          <PersonalizedRecommendations />
+          <h2 className="mb-2 text-center font-headline text-3xl md:text-4xl">Top Rated Products</h2>
+          <p className="mb-10 text-center text-muted-foreground">Discover what our customers love the most.</p>
+          <TopRatedProducts />
         </div>
       </section>
     </div>
   );
 }
+
+    
