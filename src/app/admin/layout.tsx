@@ -40,15 +40,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [authUser, userProfile, isUserLoading, isProfileLoading, router]);
 
   const isLoading = isUserLoading || isProfileLoading;
+  const isAuthorized = !isLoading && !!userProfile?.isAdmin;
 
-  // Show a loading state while we verify auth and admin status
-  if (isLoading || !userProfile?.isAdmin) {
-      return (
-        <div className="flex h-screen items-center justify-center">
-            <div>Loading Admin...</div>
-        </div>
-      )
-  }
 
   const NavContent = () => (
      <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
@@ -125,7 +118,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </DropdownMenu>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          {children}
+          {isAuthorized ? (
+            children
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <div>Loading Admin...</div>
+            </div>
+          )}
         </main>
       </div>
     </div>
