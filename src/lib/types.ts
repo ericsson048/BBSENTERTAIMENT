@@ -42,6 +42,7 @@ export type User = {
     orderCount: number;
     isAdmin?: boolean;
     favoriteProductIds?: string[];
+    name?: string; // name is a combination of firstName and lastName
 };
 
 export type CartItem = {
