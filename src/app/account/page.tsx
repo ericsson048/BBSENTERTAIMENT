@@ -76,7 +76,11 @@ export default function AccountPage() {
   const userDocRef = useMemoFirebase(() => authUser ? doc(firestore, 'users', authUser.uid) : null, [firestore, authUser]);
   const { data: user, isLoading: isUserDocLoading } = useDoc<User>(userDocRef);
   
-  const ordersQuery = useMemoFirebase(() => authUser ? query(collection(firestore, 'orders'), where('userId', '==', authUser.uid)) : null, [firestore, authUser]);
+const ordersQuery = useMemoFirebase(() => 
+  authUser ? query(collection(firestore, `users/${authUser.uid}/orders`)) : null, 
+  [firestore, authUser]
+);
+
   const { data: orders, isLoading: areOrdersLoading } = useCollection<Order>(ordersQuery);
 
   const favoriteProductIds = useMemo(() => user?.favoriteProductIds || [], [user]);
