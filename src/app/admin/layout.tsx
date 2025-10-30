@@ -141,6 +141,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const { authUser, isUserLoading, userProfile, isProfileLoading } = useAdminAuthData();
 
+  console.log('====================================');
+  console.log('userProfile:', userProfile);
+  console.log('isProfileLoading:', isProfileLoading);
+  console.log('authUser:', authUser);
+  console.log('====================================');
+
   const isLoading = isUserLoading || isProfileLoading;
   const isAuthorized = !isLoading && !!authUser && !!userProfile?.isAdmin;
 
